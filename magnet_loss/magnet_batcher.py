@@ -5,20 +5,21 @@ from sklearn.cluster import KMeans
 
 
 class MagnetSampler(Sampler):
-    def __init__(self, dataset: Dataset, k, m, d):
-        self.labels = self.get_labels()
-        self.num_classes = np.unique(self.labels).shape[0]
+    def __init__(self, dataset: Dataset, model, k, m, d):
         self.k = k
         self.m = m
         self.d = d
         self.centroids = None
+        self.dataset = dataset
+        self.model = model
+        self.labels = self.get_labels()
+        self.num_classes = np.unique(self.labels).shape[0]
         self.assignments = np.zeros_like(self.labels, int)
         self.cluster_assignments = {}
         self.cluster_classes = np.repeat(range(self.num_classes), k)
         self.example_losses = None
         self.cluster_losses = None
         self.has_loss = None
-        self.dataset = dataset
 
     def get_labels(self) -> np.ndarray:
         # Remember NOT to shuffle the train dataset, when getting labels
