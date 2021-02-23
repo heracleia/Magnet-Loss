@@ -88,16 +88,14 @@ def train_magnet():
     valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
     k = 8
     m = 8
-    d = 4
+    d = 8
     alpha = 1.0
     my_magnet_sampler = MyMagnetSampler(trainset, model, k, m, d)
     criterion = MagnetLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     e = 1
-    print_freq = int(len(trainset) / (m * d))
     model.train()
     while 1:
-        start_time = time.time()
         my_magnet_sampler.update_clusters()
         batch_class_inds = [ids for ids in my_magnet_sampler]
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=m * d, sampler=iter(batch_class_inds))
@@ -110,8 +108,7 @@ def train_magnet():
             optimizer.step()
         my_magnet_sampler.update_losses(batch_class_inds, batch_example_losses)
         e += 1
-        print(f"Execution time: {time.time()-start_time}")
-        if e % print_freq == 0:
+        if e % 100 == 0:
             print(f"Batch Loss {batch_loss}")
 
 
