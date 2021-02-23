@@ -7,6 +7,7 @@ from magnet_loss import MagnetSampler
 from magnet_loss import MagnetLoss
 import torch.nn as nn
 import torch.nn.functional as F
+import time
 
 
 class LeNet(nn.Module):
@@ -93,9 +94,10 @@ def train_magnet():
     criterion = MagnetLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     e = 1
-    print_freq = len(trainset) / (m * d)
+    print_freq = int(len(trainset) / (m * d))
     model.train()
     while 1:
+        start_time = time.time()
         my_magnet_sampler.update_clusters()
         batch_class_inds = [ids for ids in my_magnet_sampler]
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=m * d, sampler=iter(batch_class_inds))
@@ -108,6 +110,7 @@ def train_magnet():
             optimizer.step()
         my_magnet_sampler.update_losses(batch_class_inds, batch_example_losses)
         e += 1
+        print(f"Execution time: {time.time()-start_time}")
         if e % print_freq == 0:
             print(f"Batch Loss {batch_loss}")
 
