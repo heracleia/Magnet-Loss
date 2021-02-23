@@ -38,7 +38,7 @@ class MagnetSampler(Sampler):
             self.cluster_losses = np.zeros([self.k * self.num_classes], float)
             self.has_loss = np.zeros_like(self.labels, bool)
 
-        losses = losses.data.cpu().numpy()
+        losses = losses.detach().cpu().numpy()
 
         self.example_losses[indexes] = losses
         self.has_loss[indexes] = losses
@@ -92,7 +92,7 @@ class MagnetSampler(Sampler):
 
     def __iter__(self):
         # Sample seed cluster proportionally to cluster losses if available
-        if self.cluster_losses is not None:
+        if self.cluster_losses is not None and not np.isnan(self.cluster_losses).any():
             p = self.cluster_losses / np.sum(self.cluster_losses)
             seed_cluster = np.random.choice(self.num_classes * self.k, p=p)
         else:
@@ -126,8 +126,8 @@ class MagnetSampler(Sampler):
                 inds_map[c] = class_count
                 class_count += 1
             batch_class_inds.append(inds_map[c])
-
-        return batch_indexes
+        iter_indices = list(batch_indexes)
+        return iter(iter_indices)
 
     def __len__(self):
-        return 1
+        return self.m * self.d
