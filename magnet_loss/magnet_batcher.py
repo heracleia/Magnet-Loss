@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 from torch.utils.data.sampler import Sampler
 from sklearn.cluster import KMeans
+import faiss
 
 
 class MagnetSampler(Sampler):
@@ -74,16 +75,21 @@ class MagnetSampler(Sampler):
 
             class_mask = self.labels == c
             class_examples = rep_data[class_mask]
-            kmeans = KMeans(n_clusters=self.k, init="k-means++", n_init=1, max_iter=max_iter)
-            kmeans.fit(class_examples)
-
+            # kmeans = KMeans(n_clusters=self.k, init="k-means++", n_init=1, max_iter=max_iter)
+            # kmeans.fit(class_examples)
+            kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20, nredo=10)
+            kmeans.train(class_examples)
             # Save cluster centroids for finding impostor clusters
             start = self.get_cluster_ind(c, 0)
             stop = self.get_cluster_ind(c, self.k)
-            self.centroids[start:stop] = kmeans.cluster_centers_
+            # self.centroids[start:stop] = kmeans.cluster_centers_
+            self.centroids[start:stop] = kmeans.centroids
 
             # Update assignments with new global cluster indexes
-            self.assignments[class_mask] = self.get_cluster_ind(c, kmeans.predict(class_examples))
+            # self.assignments[class_mask] = self.get_cluster_ind(c, kmeans.predict(class_examples))
+            self.assignments[class_mask] = self.get_cluster_ind(
+                c, kmeans.index.search(class_examples, 1)[1].reshape((-1,))
+            )
 
         # Construct a map from cluster to example indexes for fast batch creation
         for cluster in range(self.k * self.num_classes):

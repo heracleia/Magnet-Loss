@@ -1,10 +1,6 @@
 import os
 import numpy as np
 import torch
-from torch.utils.data import sampler
-import torchvision
-import matplotlib.pyplot as plt
-from time import time
 from torchvision import datasets, transforms
 from torch import nn, optim
 from magnet_loss import MagnetSampler
@@ -35,9 +31,10 @@ class LeNet(nn.Module):
         x = x.view(-1, self.num_flat_features(x))
         self.features = x
         x = self.emb(x)
-        x = self.logmax_layer(x)
-        embeddings = x
-        return embeddings, self.features
+        # embeddings = x
+        # x = self.logmax_layer(x)
+
+        return x, self.features
 
     def num_flat_features(self, x):
         """
@@ -53,50 +50,6 @@ class LeNet(nn.Module):
 
     def name(self):
         return "lenet-magnet"
-
-
-def train_nll():
-    # Below the lenet is chosen, because of following reasons
-    # For every forward pass, it gives back the final prediction as well as features
-    # Used to train magnet loss. For your model, if you want to train it with magnet loss, you have to make a similar model
-    # where you return the prediction as well as the features, same as Lenet, implemntation above
-    model = LeNet(10).cuda()
-
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)),])
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    trainset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=True, transform=transform)
-    valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
-    my_magnet_sampler = MyMagnetSampler(trainset, model, 8, 8, 4)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
-    valloader = torch.utils.data.DataLoader(valset, batch_size=64, shuffle=True)
-    criterion = nn.NLLLoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-4)
-    epochs = 30
-
-    def validate():
-        correct_count = 0
-        model.eval()
-        for images, labels in valloader:
-            img = images.cuda()
-            labels = labels.cuda()
-            output, _ = model(img)
-            preds = torch.argmax(output, dim=1)
-            correct_count += (preds == labels).cpu().numpy().sum()
-        print("Number Of Images Tested =", len(valloader))
-        print("\nModel Accuracy =", (correct_count / len(valloader)))
-
-    for e in range(epochs):
-        model.train()
-        for images, labels in trainloader:
-            img = images.cuda()
-            labels = labels.cuda()
-            optimizer.zero_grad()
-            output, _ = model(img)
-            loss = criterion(output, labels)
-            loss.backward()
-            optimizer.step()
-        print(f"Epoch: {e}")
-        validate()
 
 
 class MyMagnetSampler(MagnetSampler):
@@ -137,24 +90,8 @@ def train_magnet():
     d = 4
     alpha = 1.0
     my_magnet_sampler = MyMagnetSampler(trainset, model, k, m, d)
-
-    valloader = torch.utils.data.DataLoader(valset, batch_size=64, shuffle=True)
     criterion = MagnetLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
-    epochs = 30
-
-    def validate():
-        correct_count = 0
-        model.eval()
-        for images, labels in valloader:
-            img = images.cuda()
-            labels = labels.cuda()
-            output, _ = model(img)
-            preds = torch.argmax(output, dim=1)
-            correct_count += (preds == labels).cpu().numpy().sum()
-        print("Number Of Images Tested =", len(valloader))
-        print("\nModel Accuracy =", (correct_count / len(valloader)))
-
     e = 1
     print_freq = len(trainset) / (m * d)
     model.train()
@@ -165,16 +102,14 @@ def train_magnet():
         for images, labels in trainloader:
             img = images.cuda()
             optimizer.zero_grad()
-            _, features = model(img)
-            batch_loss, batch_example_losses = criterion(features, labels.numpy(), m, d, alpha)
+            output, _ = model(img)
+            batch_loss, batch_example_losses = criterion(output, labels.numpy(), m, d, alpha)
             batch_loss.backward()
             optimizer.step()
         my_magnet_sampler.update_losses(batch_class_inds, batch_example_losses)
         e += 1
         if e % print_freq == 0:
-            print(f"Epoch: {e}")
-            validate()
-            model.train()
+            print(f"Batch Loss {batch_loss}")
 
 
 if __name__ == "__main__":
