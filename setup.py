@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 # Tip: Generate requirements using pigar: pigar -p requirements.txt -P magnet_loss_iclr2016/
 setup(
     name="magnet_loss_iclr2016",
-    version="0.0.1",
+    version="0.0.2",
     description="Play a PIL Image list as a video",
     author=" Kodur Krishna Chaitanya",
     author_email="kodur.chaitanya@colorado.edu",
