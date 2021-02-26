@@ -37,8 +37,8 @@ class LeNet(nn.Module):
 
     def num_flat_features(self, x):
         """
-		Calculate the total tensor x feature amount
-		"""
+        Calculate the total tensor x feature amount
+        """
 
         size = x.size()[1:]  # All dimensions except batch dimension
         num_features = 1
@@ -80,7 +80,7 @@ def train_magnet():
     # where you return the prediction as well as the features, same as Lenet, implemntation above
     model = LeNet(10).cuda()
 
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)),])
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
     dir_path = os.path.dirname(os.path.realpath(__file__))
     trainset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=True, transform=transform)
     # valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
@@ -111,5 +111,4 @@ def train_magnet():
 
 
 if __name__ == "__main__":
-    # train_nll()
     train_magnet()
