@@ -113,4 +113,3 @@ def dynamic_partition(X, partitions, n_clusters):
 
 def compute_euclidean_distance(x, y):
     return torch.sum((x - y) ** 2, dim=2)
-

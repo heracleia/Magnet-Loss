@@ -5,9 +5,7 @@ from torchvision import datasets, transforms
 from torch import nn, optim
 from magnet_loss_iclr2016 import MagnetSampler
 from magnet_loss_iclr2016 import MagnetLoss
-import torch.nn as nn
 import torch.nn.functional as F
-import time
 
 
 class LeNet(nn.Module):
@@ -85,7 +83,7 @@ def train_magnet():
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)),])
     dir_path = os.path.dirname(os.path.realpath(__file__))
     trainset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=True, transform=transform)
-    valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
+    # valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
     k = 8
     m = 8
     d = 8
