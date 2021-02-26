@@ -1,7 +1,6 @@
 from torch.utils.data import Dataset
 import numpy as np
 from torch.utils.data.sampler import Sampler
-from sklearn.cluster import KMeans
 import faiss
 
 

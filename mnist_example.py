@@ -3,8 +3,8 @@ import numpy as np
 import torch
 from torchvision import datasets, transforms
 from torch import nn, optim
-from magnet_loss import MagnetSampler
-from magnet_loss import MagnetLoss
+from magnet_loss_iclr2016 import MagnetSampler
+from magnet_loss_iclr2016 import MagnetLoss
 import torch.nn as nn
 import torch.nn.functional as F
 import time
