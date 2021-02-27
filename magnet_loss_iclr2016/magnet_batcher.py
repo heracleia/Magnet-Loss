@@ -2,6 +2,9 @@ from torch.utils.data import Dataset
 import numpy as np
 from torch.utils.data.sampler import Sampler
 import faiss
+from sklearn.manifold import TSNE
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 class MagnetSampler(Sampler):
@@ -133,6 +136,16 @@ class MagnetSampler(Sampler):
             batch_class_inds.append(inds_map[c])
         iter_indices = list(batch_indexes)
         return iter(iter_indices)
+
+    def save_tsne_to_image(self, image_save_path):
+        # As you would be training on embeddings, apart from batch lossthere isn't really a way to visualize if
+        # this is even workin
+        embeddings = self.get_reps()
+        labels = self.get_labels()
+        X_embedded = TSNE(n_components=2).fit_transform(embeddings)
+        palette = sns.color_palette("bright", np.unique(labels).shape[0])
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=labels, legend="full", palette=palette)
+        plt.savefig(image_save_path)
 
     def __len__(self):
         return self.m * self.d

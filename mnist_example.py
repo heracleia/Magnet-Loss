@@ -83,6 +83,8 @@ def train_magnet():
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
     dir_path = os.path.dirname(os.path.realpath(__file__))
     trainset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=True, transform=transform)
+    # Reducing the size, so that it can work on TSNE
+    trainset, _ = torch.utils.data.random_split(trainset, [1000, 59000])
     # valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
     k = 8
     m = 8
@@ -95,6 +97,7 @@ def train_magnet():
     model.train()
     while 1:
         my_magnet_sampler.update_clusters()
+        my_magnet_sampler.save_tsne_to_image("tsne_image.png")
         batch_class_inds = [ids for ids in my_magnet_sampler]
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=m * d, sampler=iter(batch_class_inds))
         for images, labels in trainloader:
@@ -104,7 +107,9 @@ def train_magnet():
             batch_loss, batch_example_losses = criterion(output, labels.numpy(), m, d, alpha)
             batch_loss.backward()
             optimizer.step()
+        my_magnet_sampler.save_tsne_to_image("tsne_image.png")
         my_magnet_sampler.update_losses(batch_class_inds, batch_example_losses)
+
         e += 1
         if e % 100 == 0:
             print(f"Batch Loss {batch_loss}")
