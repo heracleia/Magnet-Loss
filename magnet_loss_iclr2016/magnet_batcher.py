@@ -143,7 +143,7 @@ class MagnetSampler(Sampler):
         labels = self.get_labels()
         X_embedded = TSNE(n_components=2).fit_transform(embeddings)
         palette = sns.color_palette("bright", np.unique(labels).shape[0])
-        sc_plot = sns.scatterplot(x=X_embedded[:, 0], y=X_embedded[:, 1], hue=labels, legend="full", palette=palette)
+        sc_plot = sns.scatterplot(x=X_embedded[:, 0], y=X_embedded[:, 1], hue=labels, palette=palette)
         sc_fig = sc_plot.get_figure()
         sc_fig.savefig(image_save_path)
 
