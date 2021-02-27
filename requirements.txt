@@ -2,5 +2,19 @@
 
 # magnet_loss_iclr2016/magnet_batcher.py: 4
 faiss >= 1.7.0
+
+# magnet_loss_iclr2016/magnet_batcher.py: 7
+matplotlib >= 3.3.3
+
+# magnet_loss_iclr2016/magnet_batcher.py: 2
 numpy >= 1.19.2
+
+# magnet_loss_iclr2016/magnet_batcher.py: 5
+scikit_learn >= 0.23.2
+
+# magnet_loss_iclr2016/magnet_batcher.py: 6
+seaborn >= 0.11.1
+
+# magnet_loss_iclr2016/magnet_batcher.py: 1,3
+# magnet_loss_iclr2016/magnet_loss.py: 1,2,3,4
 torch >= 1.7.1
