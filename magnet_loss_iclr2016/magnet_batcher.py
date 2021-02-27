@@ -78,7 +78,8 @@ class MagnetSampler(Sampler):
             class_examples = rep_data[class_mask]
             # kmeans = KMeans(n_clusters=self.k, init="k-means++", n_init=1, max_iter=max_iter)
             # kmeans.fit(class_examples)
-            kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20, gpu=True)
+            # kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20, gpu=True)
+            kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20)
             kmeans.train(class_examples)
             # Save cluster centroids for finding impostor clusters
             start = self.get_cluster_ind(c, 0)
