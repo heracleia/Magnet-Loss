@@ -136,12 +136,13 @@ class MagnetSampler(Sampler):
                     inds_map[c] = class_count
                     class_count += 1
                 batch_class_inds.append(inds_map[c])
-            iter_indices.extend(list(batch_indexes))
+            iter_indices.append(list(batch_indexes))
+        # final_return_list = [j for sub in iter_indices for j in sub]
         return iter(iter_indices)
 
     def save_tsne_to_image(self, image_save_path):
         # As you would be training on embeddings, apart from batch lossthere isn't really a way to visualize if
-        # this is even workin
+        # this is even working
         embeddings = self.get_reps()
         labels = self.get_labels()
         X_embedded = TSNE(n_components=2).fit_transform(embeddings)
@@ -153,3 +154,22 @@ class MagnetSampler(Sampler):
 
     def __len__(self):
         return self.m * self.d
+
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
