@@ -101,41 +101,42 @@ class MagnetSampler(Sampler):
 
     def __iter__(self):
         # Sample seed cluster proportionally to cluster losses if available
-        if self.cluster_losses is not None and not np.isnan(self.cluster_losses).any():
-            p = self.cluster_losses / np.sum(self.cluster_losses)
-            seed_cluster = np.random.choice(self.num_classes * self.k, p=p)
-        else:
-            seed_cluster = np.random.choice(self.num_classes * self.k)
+        # if self.cluster_losses is not None and not np.isnan(self.cluster_losses).any():
+        #     p = self.cluster_losses / np.sum(self.cluster_losses)
+        #     seed_cluster = np.random.choice(self.num_classes * self.k, p=p)
+        # else:
+        #     seed_cluster = np.random.choice(self.num_classes * self.k)
+        iter_indices = []
+        for seed_cluster in range(self.num_classes * self.k):
+            # Get imposter clusters by ranking centroids by distance
+            sq_dists = ((self.centroids[seed_cluster] - self.centroids) ** 2).sum(axis=1)
 
-        # Get imposter clusters by ranking centroids by distance
-        sq_dists = ((self.centroids[seed_cluster] - self.centroids) ** 2).sum(axis=1)
+            # Assure only clusters of different class from seed are chosen
+            sq_dists[self.get_class_ind(seed_cluster) == self.cluster_classes] = np.inf
 
-        # Assure only clusters of different class from seed are chosen
-        sq_dists[self.get_class_ind(seed_cluster) == self.cluster_classes] = np.inf
+            # Get top impostor clusters and add seed
+            clusters = np.argpartition(sq_dists, self.m - 1)[: self.m - 1]
+            clusters = np.concatenate([[seed_cluster], clusters])
 
-        # Get top impostor clusters and add seed
-        clusters = np.argpartition(sq_dists, self.m - 1)[: self.m - 1]
-        clusters = np.concatenate([[seed_cluster], clusters])
+            # Sample examples uniformly from cluster
+            batch_indexes = np.empty([self.m * self.d], int)
+            for i, c in enumerate(clusters):
+                x = np.random.choice(self.cluster_assignments[c], self.d, replace=False)
+                start = i * self.d
+                stop = start + self.d
+                batch_indexes[start:stop] = x
 
-        # Sample examples uniformly from cluster
-        batch_indexes = np.empty([self.m * self.d], int)
-        for i, c in enumerate(clusters):
-            x = np.random.choice(self.cluster_assignments[c], self.d, replace=False)
-            start = i * self.d
-            stop = start + self.d
-            batch_indexes[start:stop] = x
-
-        # Translate class indexes to index for classes within the batch
-        class_inds = self.get_class_ind(clusters)
-        batch_class_inds = []
-        inds_map = {}
-        class_count = 0
-        for c in class_inds:
-            if c not in inds_map:
-                inds_map[c] = class_count
-                class_count += 1
-            batch_class_inds.append(inds_map[c])
-        iter_indices = list(batch_indexes)
+            # Translate class indexes to index for classes within the batch
+            class_inds = self.get_class_ind(clusters)
+            batch_class_inds = []
+            inds_map = {}
+            class_count = 0
+            for c in class_inds:
+                if c not in inds_map:
+                    inds_map[c] = class_count
+                    class_count += 1
+                batch_class_inds.append(inds_map[c])
+            iter_indices.extend(list(batch_indexes))
         return iter(iter_indices)
 
     def save_tsne_to_image(self, image_save_path):

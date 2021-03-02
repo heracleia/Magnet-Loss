@@ -100,13 +100,15 @@ def train_magnet():
         my_magnet_sampler.save_tsne_to_image("tsne_image.png")
         batch_class_inds = [ids for ids in my_magnet_sampler]
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=m * d, sampler=iter(batch_class_inds))
-        for images, labels in trainloader:
-            img = images.cuda()
-            optimizer.zero_grad()
-            output, _ = model(img)
-            batch_loss, batch_example_losses = criterion(output, labels.numpy(), m, d, alpha)
-            batch_loss.backward()
-            optimizer.step()
+        # The training needs to be done for n times, before updating the reps, so that it's fast
+        for _ in range(3):
+            for images, labels in trainloader:
+                img = images.cuda()
+                optimizer.zero_grad()
+                output, _ = model(img)
+                batch_loss, batch_example_losses = criterion(output, labels.numpy(), m, d, alpha)
+                batch_loss.backward()
+                optimizer.step()
         my_magnet_sampler.save_tsne_to_image("tsne_image.png")
         my_magnet_sampler.update_losses(batch_class_inds, batch_example_losses)
 
