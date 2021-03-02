@@ -84,10 +84,10 @@ def train_magnet():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     trainset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=True, transform=transform)
     # Reducing the size, so that it can work on TSNE
-    trainset, _ = torch.utils.data.random_split(trainset, [1000, 59000])
+    trainset, _ = torch.utils.data.random_split(trainset, [2000, 58000])
     # valset = datasets.MNIST(f"{dir_path}/datasets", download=True, train=False, transform=transform)
-    k = 8
-    m = 8
+    k = 4
+    m = 4
     d = 8
     alpha = 1.0
     my_magnet_sampler = MyMagnetSampler(trainset, model, k, m, d)
@@ -111,7 +111,7 @@ def train_magnet():
         my_magnet_sampler.update_losses(batch_class_inds, batch_example_losses)
 
         e += 1
-        if e % 100 == 0:
+        if e % 3 == 0:
             print(f"Batch Loss {batch_loss}")
 
 

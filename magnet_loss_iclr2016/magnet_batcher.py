@@ -4,6 +4,7 @@ from torch.utils.data.sampler import Sampler
 import faiss
 from sklearn.manifold import TSNE
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 class MagnetSampler(Sampler):
@@ -147,6 +148,7 @@ class MagnetSampler(Sampler):
         sc_plot = sns.scatterplot(x=X_embedded[:, 0], y=X_embedded[:, 1], hue=labels, palette=palette)
         sc_fig = sc_plot.get_figure()
         sc_fig.savefig(image_save_path)
+        plt.clf()
 
     def __len__(self):
         return self.m * self.d
