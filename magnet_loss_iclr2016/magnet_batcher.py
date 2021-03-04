@@ -150,7 +150,8 @@ class MagnetSampler(Sampler):
         # As you would be training on embeddings, apart from batch lossthere isn't really a way to visualize if
         # this is even working
         embeddings = self.get_reps()
-        labels = self.get_labels()
+        # Logically no need to generate labels again and again
+        # labels = self.get_labels()
         X_embedded = TSNE(n_components=2).fit_transform(embeddings)
         palette = sns.color_palette("bright", np.unique(labels).shape[0])
         sc_plot = sns.scatterplot(x=X_embedded[:, 0], y=X_embedded[:, 1], hue=labels, palette=palette)
