@@ -120,11 +120,17 @@ class MagnetSampler(Sampler):
 
             # Sample examples uniformly from cluster
             batch_indexes = np.empty([self.m * self.d], int)
-            for i, c in enumerate(clusters):
-                x = np.random.choice(self.cluster_assignments[c], self.d, replace=False)
-                start = i * self.d
-                stop = start + self.d
-                batch_indexes[start:stop] = x
+            # The main use of this try catch loop is to just ignore cluster when it doesn't have enough
+            # points to begin, they will accumulate in the future
+            try:
+                for i, c in enumerate(clusters):
+                    x = np.random.choice(self.cluster_assignments[c], self.d, replace=False)
+                    start = i * self.d
+                    stop = start + self.d
+                    batch_indexes[start:stop] = x
+            except:
+                print(f"WARNING: Cluster {c} had errors, so ignoring it")
+                continue
 
             # Translate class indexes to index for classes within the batch
             class_inds = self.get_class_ind(clusters)
