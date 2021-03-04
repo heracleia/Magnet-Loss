@@ -128,7 +128,7 @@ class MagnetSampler(Sampler):
                     start = i * self.d
                     stop = start + self.d
                     batch_indexes[start:stop] = x
-            except:
+            except:  # noqa
                 print(f"WARNING: Cluster {c} had errors, so ignoring it")
                 continue
 
