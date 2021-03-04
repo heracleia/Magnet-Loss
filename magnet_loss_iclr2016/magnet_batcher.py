@@ -79,8 +79,8 @@ class MagnetSampler(Sampler):
             class_examples = rep_data[class_mask]
             # kmeans = KMeans(n_clusters=self.k, init="k-means++", n_init=1, max_iter=max_iter)
             # kmeans.fit(class_examples)
-            # kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20, gpu=True)
-            kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20)
+            kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20, gpu=True)
+            # kmeans = faiss.Kmeans(d=class_examples.shape[1], k=self.k, niter=20)
             kmeans.train(class_examples)
             # Save cluster centroids for finding impostor clusters
             start = self.get_cluster_ind(c, 0)
@@ -153,8 +153,8 @@ class MagnetSampler(Sampler):
         # Logically no need to generate labels again and again
         # labels = self.get_labels()
         X_embedded = TSNE(n_components=2).fit_transform(embeddings)
-        palette = sns.color_palette("bright", np.unique(labels).shape[0])
-        sc_plot = sns.scatterplot(x=X_embedded[:, 0], y=X_embedded[:, 1], hue=labels, palette=palette)
+        palette = sns.color_palette("bright", np.unique(self.labels).shape[0])
+        sc_plot = sns.scatterplot(x=X_embedded[:, 0], y=X_embedded[:, 1], hue=self.labels, palette=palette)
         sc_fig = sc_plot.get_figure()
         sc_fig.savefig(image_save_path)
         plt.clf()
